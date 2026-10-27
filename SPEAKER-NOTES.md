@@ -72,11 +72,11 @@ Our vision: every campus has an on-ramp. Any student can walk into a workshop an
 
 ### 8. Statements · John · ~0:50
 
-Here’s NGF’s mission as it reads on the website today: help students from under-resourced backgrounds believe in their potential, learn modern tools like AI, and access a supportive network of innovators.
+Here’s NGF’s mission as it reads on the website today: Next Generation Founders empowers under-resourced youth by teaching creativity, innovation, and modern AI tools to help them build confidence, agency, and opportunity. It goes on to promise access to tools, community, mentors and experiences.
 
-(click) We sharpened it to say what actually happens: give every student a free first build, the AI tools to keep going, and people to keep building with. It maps to NGF’s three layers: Ignite, Access, Community.
+(click) We kept the spirit and made it concrete, so it says what actually happens: give every student a free first build, the AI tools to keep going, and people to keep building with. Those three parts map directly to NGF’s three layers: Ignite, Access, Community.
 
-The vision today is a belief: talent is universal, access and belief are not. (click) We made it something you can check: every campus has an on-ramp, and every student who takes it keeps building. That second half is the systemic change we’re after, and it’s what our follow-up test measures.
+The vision today: a world where every young person has access to the tools, support, and belief they need to see their own potential and create positive change in their communities. (click) We made it something you can check: every campus has an on-ramp, and every student who takes it keeps building. That second half is the systemic change we’re after, and it’s exactly what our follow-up test measures.
 
 ### 9. Traction · John · ~0:30
 
