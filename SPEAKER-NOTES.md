@@ -1,6 +1,6 @@
 # Speaker notes: Building the On-Ramp
 
-Total target: about 14 min 55 s. Press **N** in the deck for notes under each slide, or **P** for a presenter window. "(click)" means advance one build step.
+Total target: about 15 min 05 s. Press **N** in the deck for notes under each slide, or **P** for a presenter window. "(click)" means advance one build step.
 
 ## Who presents what
 
@@ -70,13 +70,15 @@ AI has made the barrier to building lower than it has ever been. The risk is tha
 
 Our vision: every campus has an on-ramp. Any student can walk into a workshop and walk out having built something. That’s the systemic change: not one event, but a door that stays open.
 
-### 8. Statements · John · ~0:50
+### 8. Statements · John · ~1:00
 
-Here’s NGF’s mission as it reads on the website today: Next Generation Founders empowers under-resourced youth by teaching creativity, innovation, and modern AI tools to help them build confidence, agency, and opportunity. It goes on to promise access to tools, community, mentors and experiences.
+NGF already has strong statements on its website. We kept their spirit and tightened each one so it does one job, the way established organizations write them.
 
-(click) We kept the spirit and made it concrete, so it says what actually happens: give every student a free first build, the AI tools to keep going, and people to keep building with. Those three parts map directly to NGF’s three layers: Ignite, Access, Community.
+(click) Mission is what we do, for whom, and the result: to give under-resourced students the skills, tools, and community to build with AI and turn their ideas into impact. Skills, tools and community map directly to NGF’s three layers: Ignite, Access, Community.
 
-The vision today: a world where every young person has access to the tools, support, and belief they need to see their own potential and create positive change in their communities. (click) We made it something you can check: every campus has an on-ramp, and every student who takes it keeps building. That second half is the systemic change we’re after, and it’s exactly what our follow-up test measures.
+(click) Purpose is why we exist, in one line: so that a student’s background never decides whether they get to build.
+
+(click) Vision is the world we’re working toward: a future where every campus is an on-ramp, and every young person can build with AI to change their community. That’s the systemic change: not one great workshop, but a permanent door on every campus, renewed each year through student clubs.
 
 ### 9. Traction · John · ~0:30
 
