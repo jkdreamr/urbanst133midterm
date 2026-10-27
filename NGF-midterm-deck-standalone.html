@@ -569,19 +569,19 @@ body.presenter #presenter{display:grid;grid-template-columns:1fr 340px;gap:28px;
 <section class="slide" data-label="The gap" data-steps="2" data-hook="waffle">
   <p class="M r" style="--d:0;position:absolute;left:96px;top:150px;color:var(--green)">The need</p>
   <div class="need-num">
-    <h2 class="X hands" data-only="0">1 in 2</h2>
+    <h2 class="X hands" data-only="0">88%</h2>
     <h2 class="X green" data-step="1">17%</h2>
   </div>
   <div class="need-cap">
-    <p class="S" data-only="0">say no one at their college taught them to judge AI.</p>
-    <p class="S" data-step="1">think their instructors can guide them on AI.</p>
+    <p class="S" data-only="0">of students worldwide already use AI in their studies.</p>
+    <p class="S" data-step="1">of US and Canadian students think their instructors can guide them on AI.</p>
   </div>
   <div class="waffle r" style="--d:200" id="waffle" aria-hidden="true"></div>
   <div class="paywall" data-step="2"><span class="tag">ChatGPT</span><span class="tag">Cursor</span><span class="tag">Lovable</span><span class="S">all behind a paywall.</span></div>
-  <p class="src">Sources: CCSSE 2025 national cohort, AI item frequencies (community college students) · Digital Education Council, Global AI in Higher Ed Survey 2026 (US &amp; Canada)</p>
+  <p class="src">Source: Digital Education Council, AI in Higher Education Global Survey 2026 (45,398 responses across 35 countries). One dot = 1%.</p>
   <aside class="notes" data-time="0:50">
-    <p>Is there actually a need? In the 2025 national community college survey, nearly half of students said no one at their college taught them how to judge what AI tells them. They’re figuring it out alone.</p>
-    <p>(click) And only about one in six students think their instructors are well equipped to guide them on AI.</p>
+    <p>Is there actually a need? This is from the Digital Education Council’s 2026 global survey, over 45,000 responses. 88 percent of students already use AI in their studies. Every dot is one percent.</p>
+    <p>(click) But in the US and Canada, only 17 percent of students think their instructors are well equipped to guide them on it. Almost everyone is using it; almost nobody is being shown how. And community college students, with the least time and money, are the ones most likely to fall through that gap.</p>
     <p>(click) Then there’s cost. ChatGPT, Cursor, Lovable: the good versions are subscriptions. For students choosing between a textbook and a tank of gas, that’s a wall.</p>
   </aside>
 </section>
@@ -988,7 +988,7 @@ body.presenter #presenter{display:grid;grid-template-columns:1fr 340px;gap:28px;
 
   const hooks={
     story:{step(s,k){document.getElementById('laptop').dataset.s=k>=4?'site':k>=2?'wall':'idea'}},
-    waffle:{step(s,k){clearTimers();dots.forEach((d,i)=>{d.className='';if(k===0)later(()=>{if(i<47)d.className='a'},500+i*11);else later(()=>{if(i<17)d.className='b'},100+i*22)})}},
+    waffle:{step(s,k){clearTimers();dots.forEach((d,i)=>{d.className='';if(k===0)later(()=>{if(i<88)d.className='a'},500+i*9);else later(()=>{if(i<17)d.className='b'},100+i*22)})}},
     brief:{step(s,k){s.classList.toggle('s1',k>=1)}},
     lovable:{enter:runLovable}
   };

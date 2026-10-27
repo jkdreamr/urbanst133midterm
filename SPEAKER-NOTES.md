@@ -50,9 +50,9 @@ Meet Maya. She’s a composite, not one person, but you’ve met her. She’s at
 
 ### 5. The gap · Callen · ~0:50
 
-Is there actually a need? In the 2025 national community college survey, nearly half of students said no one at their college taught them how to judge what AI tells them. They’re figuring it out alone.
+Is there actually a need? This is from the Digital Education Council’s 2026 global survey, over 45,000 responses. 88 percent of students already use AI in their studies. Every dot is one percent.
 
-(click) And only about one in six students think their instructors are well equipped to guide them on AI.
+(click) But in the US and Canada, only 17 percent of students think their instructors are well equipped to guide them on it. Almost everyone is using it; almost nobody is being shown how. And community college students, with the least time and money, are the ones most likely to fall through that gap.
 
 (click) Then there’s cost. ChatGPT, Cursor, Lovable: the good versions are subscriptions. For students choosing between a textbook and a tank of gas, that’s a wall.
 
