@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building the On-Ramp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Serif:ital@0;1&family=Martian+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>
+/* Fill these in before class. Anything left as null stays hidden. */
+window.DECK_CONFIG = {
+  collegesResearched: null,   // e.g. 14
+  leadersContacted:   null,   // e.g. 22
+  conversations:      null,   // e.g. 6
+  menloAttendance:    null,   // e.g. 40
+  foothillAttendance: null    // e.g. 15
+};
+</script>
+<style>
+:root{
+  /* Next Generation Founders palette: forest + leaf greens, warm hands orange */
+  --cream:#F3EDE1; --cream2:#E6DCC8; --ink:#0F1A13; --muted:#5D675F; --line:#CDBFA6;
+  --forest:#0E2A19; --green:#23683A; --leaf:#7DB247; --hands:#E3954B; --hands2:#F2B57A;
+  --wipe:cubic-bezier(.77,0,.18,1); --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.34,1.4,.64,1);
+  --x:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+  --mono:"Martian Mono",ui-monospace,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#050906;color:var(--ink);font-family:var(--x);overflow:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0;font-weight:inherit}
+img{display:block}
+.viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.stage{width:1600px;height:900px;position:relative;flex:none;transform-origin:center;background:var(--forest);overflow:hidden;cursor:none}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:80;opacity:.13;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- type system ---------- */
+.X{font-family:var(--x);font-stretch:125%;font-weight:900;text-transform:uppercase;letter-spacing:-.025em;line-height:.84}
+.S{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em;line-height:.9}
+.M{font-family:var(--mono);font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.hands{color:var(--hands)} .leaf{color:var(--leaf)} .green{color:var(--green)}
+
+/* ---------- slide engine: editorial wipe ---------- */
+.slide{position:absolute;inset:0;background:var(--cream);overflow:hidden}
+.slide.dark{background:var(--forest);color:var(--cream)}
+.slide:not(.active):not(.leaving){display:none}
+.slide.active{z-index:3;animation:wipeIn 1s var(--wipe) both}
+.slide.leaving{z-index:2;animation:recede 1s var(--wipe) both;pointer-events:none}
+.back .slide.active{animation-name:wipeInBack}
+.back .slide.leaving{animation-name:recedeBack}
+@keyframes wipeIn{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}
+@keyframes wipeInBack{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes recede{to{transform:translateX(-12%) scale(.96);filter:brightness(.45)}}
+@keyframes recedeBack{to{transform:translateX(12%) scale(.96);filter:brightness(.45)}}
+
+.r{opacity:0}
+.slide.active .r{animation:rise 1s var(--ease) both;animation-delay:calc(var(--d,0) * 1ms + 420ms)}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+.ln{display:block;overflow:hidden;padding:.04em 0 .06em;margin:-.04em 0 -.06em}
+.ln>span{display:inline-block;transform:translateY(115%)}
+.slide.active .ln>span{animation:lineUp 1.1s var(--ease) both;animation-delay:calc(var(--d,0) * 1ms + 380ms)}
+@keyframes lineUp{from{transform:translateY(115%) skewY(6deg)}to{transform:none}}
+[data-step],[data-only]{opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .7s var(--ease)}
+[data-step].on,[data-only].on{opacity:1;transform:none}
+
+/* photos */
+.ph{position:absolute;overflow:hidden;background:var(--forest)}
+.ph img{width:100%;height:100%;object-fit:cover;transform:scale(1.12);transition:transform 1.6s var(--ease)}
+.slide.active .ph img{transform:scale(1.04)}
+.duo img{filter:grayscale(1) contrast(1.15) brightness(1.05);mix-blend-mode:multiply}
+.duo{background:var(--green)}
+.duo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,42,25,0) 40%,rgba(14,42,25,.75));pointer-events:none}
+.slide.active .ph.reveal{animation:phIn 1.3s var(--wipe) both;animation-delay:calc(var(--d,0) * 1ms + 250ms)}
+@keyframes phIn{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0)}}
+
+.pol{position:absolute;background:#FFFDF7;padding:10px;box-shadow:0 40px 70px -28px rgba(0,0,0,.55),0 10px 20px -10px rgba(0,0,0,.3);transform:rotate(var(--rot,0deg))}
+.pol img{width:100%;height:100%;object-fit:cover}
+.slide.active .pol{animation:drop 1.2s cubic-bezier(.2,.9,.25,1.1) both;animation-delay:calc(var(--d,0) * 1ms + 500ms)}
+@keyframes drop{from{opacity:0;transform:translateY(90px) rotate(calc(var(--rot,0deg) + 9deg)) scale(.92)}to{opacity:1;transform:rotate(var(--rot,0deg))}}
+[data-depth]{translate:calc(var(--mx,0) * var(--depth) * 1px) calc(var(--my,0) * var(--depth) * 1px);transition:translate .25s linear}
+
+/* corner furniture */
+.chrome{position:absolute;inset:0;pointer-events:none;z-index:60}
+.chrome .ct{position:absolute;top:34px;right:44px;font-family:var(--mono);font-size:13px;letter-spacing:.08em;color:var(--muted);transition:color .5s}
+.chrome .brand{position:absolute;top:30px;left:44px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:color .5s}
+.chrome .brand img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.stage.on-dark .chrome .ct,.stage.on-dark .chrome .brand{color:rgba(243,237,225,.6)}
+.route{position:absolute;left:44px;right:44px;bottom:28px;height:26px;z-index:61}
+.route .track{position:absolute;left:0;right:0;top:12px;height:2px;background:rgba(93,103,95,.3)}
+.route .fillr{position:absolute;left:0;top:12px;height:2px;background:var(--hands);transition:width 1s var(--wipe)}
+.route .stop{position:absolute;top:8px;width:10px;height:10px;margin-left:-5px;border-radius:50%;border:0;background:rgba(93,103,95,.35);padding:0;cursor:none;transition:background .3s,transform .3s var(--spring)}
+.route .stop:hover{transform:scale(1.8)}
+.route .stop.passed{background:var(--hands)}
+.route .tram{position:absolute;top:1px;left:0;width:38px;height:22px;margin-left:-19px;transition:left 1s var(--spring)}
+.stage.on-dark .route .track{background:rgba(243,237,225,.18)}
+.stage.on-dark .route .stop{background:rgba(243,237,225,.25)}
+.stage.on-dark .route .stop.passed{background:var(--hands)}
+
+/* cursor */
+.cur{position:absolute;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:1.5px solid var(--hands);z-index:90;pointer-events:none;transition:width .35s var(--spring),height .35s var(--spring),margin .35s var(--spring),background .3s,opacity .4s}
+.cur.dot{width:8px;height:8px;margin:-4px 0 0 -4px;background:var(--hands);border:0}
+.cur.big{width:90px;height:90px;margin:-45px 0 0 -45px;background:rgba(227,149,75,.18)}
+.stage.idle .cur{opacity:0}
+
+/* controls + notes */
+.controls{position:fixed;right:14px;bottom:12px;display:flex;gap:6px;z-index:100;opacity:0;transition:opacity .3s}
+.controls:hover{opacity:1}
+.controls button{font:500 12px var(--mono);color:#EDE7DA;background:rgba(15,26,19,.8);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:7px 12px;cursor:pointer}
+.notes-panel{position:fixed;left:0;right:0;bottom:0;max-height:36vh;overflow:auto;background:#0B140E;color:#E9E3D6;border-top:2px solid var(--hands);padding:16px 28px 26px;font:400 18px/1.55 var(--x);display:none;z-index:110}
+.notes-panel.open{display:block}
+.notes-panel .t{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--hands);margin-bottom:8px}
+.notes-panel p{margin:0 0 .6em;max-width:92ch}
+aside.notes{display:none}
+#presenter{display:none}
+body.presenter .viewport,body.presenter .controls{display:none}
+body.presenter{background:#0B140E;color:#EDE7DA;overflow:auto}
+body.presenter #presenter{display:grid;grid-template-columns:1fr 340px;gap:28px;padding:32px 40px;min-height:100vh}
+#presenter .now{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--hands)}
+#presenter h1{font-family:var(--x);font-stretch:125%;font-weight:900;text-transform:uppercase;font-size:40px;margin:8px 0 18px}
+#presenter .pn p{font-size:23px;line-height:1.5;margin:0 0 .7em;max-width:62ch}
+#presenter .side{border-left:1px solid #22332A;padding-left:28px}
+#presenter .clock{font-family:var(--mono);font-size:52px;font-weight:600}
+#presenter .sm{font-size:14px;color:#8C978E;margin-top:4px}
+#presenter .nx{margin-top:34px;font-size:21px}
+#presenter .btns{display:flex;gap:10px;margin-top:30px}
+#presenter .btns button{flex:1;font:600 17px var(--x);padding:16px;border-radius:12px;border:1px solid #22332A;background:#13201A;color:#EDE7DA;cursor:pointer}
+
+/* ===== 1 TITLE ===== */
+.t-photo{right:0;top:0;width:640px;height:900px}
+.t-h{position:absolute;left:60px;top:150px;z-index:5}
+.t-h .a{font-size:132px}
+.t-h .b{font-size:250px;margin-top:-18px;margin-left:120px;color:var(--hands);position:relative}
+.band{position:absolute;left:-60px;right:-60px;top:690px;height:84px;background:var(--green);transform:rotate(-2.4deg);display:flex;align-items:center;overflow:hidden;z-index:6;box-shadow:0 20px 40px -20px rgba(0,0,0,.5)}
+.slide.active .band.r{animation-name:bandIn}
+@keyframes bandIn{from{opacity:0;transform:rotate(-2.4deg) translateY(60px)}to{opacity:1;transform:rotate(-2.4deg)}}
+.band .track{display:flex;white-space:nowrap;animation:marq 28s linear infinite}
+.band span{font-family:var(--x);font-stretch:125%;font-weight:900;font-size:40px;text-transform:uppercase;color:var(--cream);padding-right:40px}
+.band span i{font-family:var(--serif);font-weight:400;text-transform:none;color:var(--hands2);font-size:50px}
+@keyframes marq{to{transform:translateX(-50%)}}
+.t-team{position:absolute;left:64px;top:806px;font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.t-team b{color:var(--ink);font-weight:600}
+
+/* ===== 2 STORY ===== */
+.st-big{position:absolute;left:96px;top:250px;width:820px;height:400px}
+.st-big>*{position:absolute;left:0;top:0;width:100%}
+.st-big .X{font-size:112px}
+.st-big .S{font-size:150px;color:var(--leaf)}
+.laptop{position:absolute;left:960px;top:250px;width:560px;height:390px}
+.laptop .screen{position:absolute;left:50px;top:0;width:460px;height:300px;border-radius:16px 16px 4px 4px;background:#16241B;border:9px solid #24342A;overflow:hidden;transition:box-shadow .8s}
+.laptop .base{position:absolute;left:0;top:298px;width:560px;height:24px;border-radius:4px 4px 20px 20px;background:linear-gradient(#2F3F35,#1B261F)}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.scr.wall,.scr.site{opacity:0}
+.scr.wall{background:repeating-linear-gradient(135deg,#16241B 0 14px,#1A2B20 14px 28px)}
+.scr.wall b{font-family:var(--x);font-stretch:125%;font-weight:900;font-size:64px;color:var(--hands)}
+.scr.site{background:#FBF7EF;color:var(--ink);align-items:stretch;justify-content:flex-start;padding:16px 18px}
+.laptop[data-s="wall"] .idea,.laptop[data-s="site"] .idea{opacity:0;transform:scale(.95)}
+.laptop[data-s="wall"] .wall{opacity:1}
+.laptop[data-s="site"] .site{opacity:1}
+.laptop[data-s="site"] .screen{box-shadow:0 0 140px rgba(125,178,71,.45)}
+.mini-nav{display:flex;justify-content:space-between;font:800 13px var(--x);font-stretch:125%;text-transform:uppercase}
+.mini-hero{margin-top:22px;font-family:var(--serif);font-style:italic;font-size:44px;line-height:.92}
+.mini-btn{margin-top:14px;align-self:flex-start;background:var(--green);color:#fff;font:600 13px var(--x);border-radius:999px;padding:7px 14px}
+.mini-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.mini-cards div{height:56px;border-radius:9px;background:#EDE4D2}
+
+/* ===== 3 NEED ===== */
+.need-num{position:absolute;left:84px;top:200px;width:820px;height:300px}
+.need-num>*{position:absolute;left:0;top:30px;font-size:230px;white-space:nowrap}
+.need-cap{position:absolute;left:96px;top:520px;width:640px;height:150px}
+.need-cap>*{position:absolute;left:0;top:0;font-size:48px;line-height:1.02}
+.waffle{position:absolute;left:960px;top:190px;display:grid;grid-template-columns:repeat(10,1fr);gap:12px;width:520px}
+.waffle i{display:block;aspect-ratio:1;border-radius:50%;background:var(--cream2);transition:background .5s var(--ease),transform .45s var(--spring)}
+.waffle i.a{background:var(--hands)} .waffle i.b{background:var(--green)}
+.waffle i:hover{transform:scale(1.5)}
+.paywall{position:absolute;left:96px;top:700px;display:flex;gap:16px;align-items:center}
+.tag{font:600 20px var(--mono);padding:10px 18px;border-radius:999px;background:var(--ink);color:var(--cream)}
+.paywall .S{font-size:44px;margin-left:18px}
+.src{position:absolute;left:96px;bottom:70px;font:400 11px var(--mono);letter-spacing:.03em;color:var(--muted);max-width:1100px}
+
+/* ===== 4 BRIEF ===== */
+.brief svg{position:absolute;inset:0;width:1600px;height:900px}
+.brief .flow{stroke-dasharray:3 22;animation:flow 1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-25}}
+.brief .lt{stroke:var(--leaf);transition:stroke-width .6s var(--ease)}
+.brief.s1 .lt{stroke-width:22}
+.blab{position:absolute}
+.blab .X{font-size:46px}
+.blab .M{margin-top:12px}
+
+/* ===== 5 MISSION ===== */
+.mi-bg{inset:0}
+.mi-bg.duo::after{background:linear-gradient(90deg,rgba(14,42,25,.92) 30%,rgba(14,42,25,.35))}
+.mi-h{position:absolute;left:96px;top:170px;z-index:3;color:var(--cream)}
+.mi-h .X{font-size:150px}
+.mi-h .S{font-size:64px;color:var(--hands2);margin-top:34px;max-width:20ch;line-height:1}
+
+/* ===== 6 WIDEN ===== */
+.wd-h{position:absolute;left:96px;top:110px}
+.wd-h .X{font-size:96px}
+.wd-h .S{font-size:120px;color:var(--hands);margin-left:10px}
+.rows{position:absolute;left:96px;right:96px;top:380px}
+.row{display:grid;grid-template-columns:470px 110px 1fr auto;align-items:center;padding:20px 0;border-top:1.5px solid var(--line)}
+.row:last-child{border-bottom:1.5px solid var(--line)}
+.row .from{font-family:var(--serif);font-size:44px;color:var(--muted);position:relative;justify-self:start}
+.row .from::after{content:"";position:absolute;left:-4px;right:-4px;top:55%;height:4px;background:var(--hands);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease) .3s}
+.row.on .from::after{transform:scaleX(1)}
+.row .to{font-family:var(--x);font-stretch:125%;font-weight:900;font-size:50px;text-transform:uppercase;letter-spacing:-.02em;transition:color .3s,transform .5s var(--ease)}
+.row>.M{font-size:34px;color:var(--hands)}
+.row .pf{font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--green);text-transform:uppercase}
+.row:hover .to{color:var(--green);transform:translateX(16px)}
+.peek{position:absolute;left:0;top:0;width:300px;height:220px;pointer-events:none;z-index:20;opacity:0;transform:scale(.6) rotate(-4deg);transition:opacity .3s,transform .5s var(--spring);box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border:6px solid #FFFDF7;overflow:hidden;margin:-250px 0 0 30px}
+.peek img{width:100%;height:100%;object-fit:cover}
+.peek.show{opacity:1;transform:scale(1) rotate(-3deg)}
+
+/* ===== 7 WORK ===== */
+.wk-h{position:absolute;left:96px;top:110px}
+.wk-h .X{font-size:96px}.wk-h .S{font-size:120px;color:var(--leaf)}
+.journey{position:absolute;left:96px;right:96px;top:470px;height:240px}
+.journey>svg{position:absolute;left:0;top:0;width:1408px;height:120px}
+.jstop{position:absolute;top:0;width:200px;text-align:center;translate:-50% 0}
+.jstop .ic{width:112px;height:112px;margin:0 auto;border-radius:50%;background:var(--forest);border:2px solid rgba(243,237,225,.25);display:grid;place-items:center;color:var(--cream);transition:transform .45s var(--spring),background .3s,border-color .3s}
+.jstop:hover .ic{transform:scale(1.15) rotate(-6deg);background:var(--hands);border-color:var(--hands)}
+.jstop .ic svg{width:46px;height:46px}
+.jstop h3{font-family:var(--x);font-stretch:125%;font-weight:800;font-size:22px;text-transform:uppercase;margin-top:22px;letter-spacing:-.01em}
+.tally{position:absolute;left:96px;top:740px;display:flex;gap:70px}
+.tally div{font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:rgba(243,237,225,.6)}
+.tally b{display:block;font-family:var(--x);font-stretch:125%;font-weight:900;font-size:54px;color:var(--hands);letter-spacing:-.02em;line-height:1;margin-bottom:6px}
+
+/* ===== 8 BUILD ===== */
+.bd-h{position:absolute;left:96px;top:210px}
+.bd-h .X{font-size:104px}.bd-h .S{font-size:140px;color:var(--green);margin-top:-6px}
+.timer{position:absolute;left:96px;top:560px;display:flex;align-items:center;gap:12px;font:600 24px var(--mono);background:var(--ink);color:var(--cream);border-radius:999px;padding:12px 22px}
+.timer i{width:10px;height:10px;border-radius:50%;background:#E5484D;animation:blink 1.2s steps(1) infinite}
+.replay{position:absolute;left:96px;top:640px;font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@keyframes blink{50%{opacity:0}}
+.browser{position:absolute;left:700px;top:150px;width:820px;height:580px;border-radius:16px;background:#FFFDF8;box-shadow:0 50px 90px -40px rgba(0,0,0,.55),0 0 0 1px rgba(15,26,19,.08);overflow:hidden}
+.browser .bar{height:42px;background:#EAE1CF;display:flex;align-items:center;gap:8px;padding:0 16px}
+.browser .bar i{width:11px;height:11px;border-radius:50%;background:#CDBFA6}
+.browser .bar .url{margin-left:12px;flex:1;height:24px;border-radius:7px;background:#FBF7EF;font:400 12px var(--mono);color:var(--muted);display:flex;align-items:center;padding:0 12px}
+.prompt{position:absolute;left:22px;right:22px;bottom:20px;background:var(--ink);color:var(--cream);border-radius:14px;padding:16px 18px;font:500 20px var(--x);display:flex;gap:10px;align-items:center;transition:transform .8s var(--ease),opacity .8s}
+.prompt .caret{display:inline-block;width:2px;height:22px;background:var(--leaf);animation:blink 1s steps(1) infinite}
+.prompt .send{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--hands);flex:none;display:grid;place-items:center}
+.site{padding:26px 34px}
+.lv{opacity:0;transform:translateY(16px) scale(.97);transition:opacity .6s var(--ease),transform .7s var(--spring)}
+.lv.in{opacity:1;transform:none}
+.site .nav{display:flex;justify-content:space-between;align-items:center;font:900 18px var(--x);font-stretch:125%;text-transform:uppercase}
+.site .nav span{font:400 12px var(--mono);color:var(--muted);margin-left:18px;letter-spacing:.05em}
+.site .hero{margin-top:40px;font-family:var(--serif);font-style:italic;font-size:76px;line-height:.9;max-width:13ch}
+.site .btn{margin-top:22px;display:inline-block;background:var(--green);color:#fff;font:600 16px var(--x);padding:12px 22px;border-radius:999px}
+.site .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
+.site .cards div{border-radius:14px;background:#EFE6D4;padding:14px 16px;font:700 15px var(--x);height:88px}
+.site .cards div span{display:block;font:400 11px var(--mono);color:var(--muted);margin-top:8px;text-transform:uppercase}
+
+/* ===== 9-10 CAMPUS ===== */
+.cp-name{position:absolute;z-index:4}
+.cp-name .X{font-size:200px}
+.cp-name .S{font-size:130px;color:var(--hands);margin-top:-10px}
+.cp-meta{position:absolute;z-index:4;display:flex;flex-direction:column;gap:10px}
+.cp-meta .M{color:var(--muted)}
+.cp-meta .M b{color:var(--ink);font-weight:600}
+.chips{position:absolute;display:flex;flex-wrap:wrap;gap:8px;z-index:4}
+.chips span{font:400 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;border:1.5px solid rgba(243,237,225,.5);border-radius:999px;padding:7px 13px;transition:background .25s,color .25s}
+.chips span:hover{background:var(--cream);color:var(--forest)}
+.stamp{position:absolute;width:180px;height:180px;z-index:7}
+.stamp svg{width:100%;height:100%;animation:spin 22s linear infinite}
+.stamp b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--x);font-stretch:125%;font-weight:900;font-size:34px;text-transform:uppercase;color:var(--forest)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.attend{font-family:var(--serif);font-style:italic;font-size:40px;color:var(--green)}
+
+/* ===== 11 STAKEHOLDERS ===== */
+.orbit{position:absolute;inset:0;width:1600px;height:900px}
+.orbit .ring{animation:spin 90s linear infinite;transform-origin:800px 470px}
+.node{position:absolute;translate:-50% -50%;text-align:center}
+.node.core{width:220px;height:220px;border-radius:50%;background:var(--hands);color:var(--forest);display:grid;place-items:center;font-family:var(--x);font-stretch:125%;font-weight:900;font-size:24px;text-transform:uppercase;box-shadow:0 0 0 22px rgba(227,149,75,.12),0 0 0 50px rgba(227,149,75,.06)}
+.node.cust{font-family:var(--x);font-stretch:125%;font-weight:900;font-size:30px;text-transform:uppercase;color:var(--cream);line-height:.95}
+.node.cust small{display:block;font:400 11px var(--mono);letter-spacing:.06em;color:rgba(243,237,225,.55);margin-top:10px}
+.node.alt{border:1.5px dashed rgba(243,237,225,.35);color:rgba(243,237,225,.6);border-radius:999px;padding:9px 18px;font:400 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.timebox{position:absolute;right:96px;top:110px;text-align:right}
+.timebox .S{font-size:52px;color:var(--hands2)}
+.timebox .X{font-size:120px;color:var(--cream)}
+.edgebox{position:absolute;left:96px;top:110px}
+.edgebox .X{font-size:46px;line-height:.95;color:var(--leaf)}
+
+/* ===== 12 VALUE ===== */
+.vl-h{position:absolute;left:96px;top:100px}
+.vl-h .X{font-size:84px}.vl-h .S{font-size:110px;color:var(--green)}
+.tiles{position:absolute;left:96px;right:96px;top:420px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.tile{background:var(--forest);color:var(--cream);border-radius:20px;padding:24px 24px 26px;height:330px;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:translate .5s var(--spring),rotate .5s var(--spring),background .35s}
+.tile:hover{translate:0 -12px;rotate:-1deg;background:var(--green)}
+.tile .n{font:400 12px var(--mono);color:var(--hands2)}
+.tile .X{font-size:34px;margin-top:auto}
+.tile p{font:400 12px/1.6 var(--mono);letter-spacing:.03em;text-transform:uppercase;color:rgba(243,237,225,.65);margin-top:14px}
+.tile .big{position:absolute;right:6px;top:-40px;font-family:var(--serif);font-style:italic;font-size:220px;color:rgba(243,237,225,.08);line-height:1}
+
+/* ===== 13 NEXT ===== */
+.nx-h{position:absolute;left:96px;top:110px}
+.nx-h .X{font-size:96px}.nx-h .S{font-size:120px;color:var(--hands)}
+.nextline{position:absolute;left:96px;right:96px;top:420px;height:160px}
+.nextline svg{position:absolute;left:0;top:0;width:1408px;height:80px}
+.ns{position:absolute;top:22px;translate:-50% 0;text-align:center;width:170px}
+.ns i{display:block;width:30px;height:30px;margin:0 auto;border-radius:50%;background:var(--cream);border:4px solid var(--ink);transform:scale(0);transition:transform .6s var(--spring),background .25s}
+.slide.active .ns i{transform:scale(1);transition-delay:calc(var(--d) * 1ms + 900ms)}
+.ns:hover i{background:var(--hands);border-color:var(--hands);transform:scale(1.4)!important;transition-delay:0ms!important}
+.ns b{display:block;font-family:var(--x);font-stretch:125%;font-weight:800;font-size:20px;text-transform:uppercase;margin-top:16px}
+.ns.done i{background:var(--green);border-color:var(--green)}
+.ns.done b{color:var(--green)}
+.ask{position:absolute;left:96px;right:96px;top:650px;display:flex;justify-content:space-between;align-items:flex-end}
+.ask .X{font-size:64px}
+.ask .S{font-size:84px;color:var(--green)}
+.ask .M{color:var(--muted);text-align:right;line-height:1.8}
+
+/* ===== 14 THANKS ===== */
+.film{position:absolute;left:0;height:300px;display:flex;gap:18px;width:max-content}
+.film .ph{position:relative;height:300px;flex:none;border-radius:6px}
+.film.f1{top:30px;animation:marq 40s linear infinite}
+.film.f2{top:570px;animation:marq 46s linear infinite reverse}
+.ty{position:absolute;left:-40px;right:-40px;top:335px;height:230px;background:var(--hands);display:flex;align-items:center;justify-content:center;gap:40px;z-index:4;transform:rotate(-1.5deg);box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.slide.active .ty.r{animation-name:tyIn}
+@keyframes tyIn{from{opacity:0;transform:rotate(-1.5deg) scaleX(.6)}to{opacity:1;transform:rotate(-1.5deg)}}
+.ty .X{font-size:128px;color:var(--forest)}
+.ty .S{font-size:110px;color:var(--cream)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0ms!important}
+}
+</style>
+</head>
+<body>
+<div class="viewport">
+<div class="stage" id="stage">
+
+<!-- 1 TITLE -->
+<section class="slide" data-label="Intro">
+  <div class="ph duo reveal t-photo" style="--d:0"><img src="assets/menlo-room.jpg" alt="A packed Menlo College workshop" data-depth="-6"></div>
+  <div class="t-h">
+    <h1 class="X a"><span class="ln" style="--d:150"><span>Building</span></span><span class="ln" style="--d:260"><span>the</span></span></h1>
+    <div class="S b"><span class="ln" style="--d:420"><span>on-ramp</span></span></div>
+  </div>
+  <div class="pol" style="--rot:5deg;--d:700;left:1040px;top:420px;width:420px;height:240px;z-index:7" data-depth="14"><img src="assets/foothill-group.jpg" alt="Foothill Startup Club with the NGF team"></div>
+  <p class="t-team r" style="--d:900"><b>Joshua Koo · Callen Bronson · John Salvi · Wiley Kendall</b> &nbsp;/&nbsp; SEC Midterm · Fall 2026</p>
+  <div class="band r" style="--d:600"><div class="track"><span>Creators, <i>not just</i> consumers of AI ✺ Next Generation Founders ✺ </span><span>Creators, <i>not just</i> consumers of AI ✺ Next Generation Founders ✺ </span><span>Creators, <i>not just</i> consumers of AI ✺ Next Generation Founders ✺ </span><span>Creators, <i>not just</i> consumers of AI ✺ Next Generation Founders ✺ </span></div></div>
+  <aside class="notes" data-time="0:20">
+    <p>Hi everyone. We’re working with Next Generation Founders, a student-run nonprofit John co-founded about a year ago with Rishi Sadanandan.</p>
+    <p>Our project is building the on-ramp: bringing AI tools and entrepreneurship to campuses NGF has never reached. That photo behind me is from two weeks ago.</p>
+  </aside>
+</section>
+
+<!-- 2 STORY -->
+<section class="slide dark" data-label="Story" data-steps="4" data-hook="story">
+  <p class="M r" style="--d:0;position:absolute;left:96px;top:170px;color:var(--hands)">Meet Maya / a composite student</p>
+  <div class="st-big">
+    <h2 class="X" data-only="0">An idea.</h2>
+    <h2 class="X" data-only="1">A laptop.</h2>
+    <h2 class="X" data-only="2">A <span class="hands">$20/mo</span> paywall.</h2>
+    <h2 class="X" data-only="3">Zero founders nearby.</h2>
+    <h2 class="S" data-only="4">So we brought both.</h2>
+  </div>
+  <div class="laptop r" style="--d:250" id="laptop" data-s="idea" data-depth="10">
+    <div class="screen">
+      <div class="scr idea"><svg width="110" height="110" viewBox="0 0 120 120" fill="none" stroke="#F2B57A" stroke-width="4" stroke-linecap="round"><path d="M60 22a30 30 0 0 0-18 54c4 3 6 7 6 12v4h24v-4c0-5 2-9 6-12a30 30 0 0 0-18-54z"/><path d="M50 102h20M54 110h12"/><path d="M60 6v6M20 22l5 5M100 22l-5 5M8 60h7M105 60h7" stroke="#7DB247"/></svg></div>
+      <div class="scr wall"><svg width="70" height="70" viewBox="0 0 90 90" fill="none" stroke="#E3954B" stroke-width="5" stroke-linecap="round"><rect x="18" y="40" width="54" height="40" rx="8"/><path d="M30 40V28a15 15 0 0 1 30 0v12"/></svg><b>$20/MO</b></div>
+      <div class="scr site"><div class="mini-nav"><span>NightShift</span><span>Join</span></div><div class="mini-hero">Study groups for people who work late.</div><div class="mini-btn">Find my group</div><div class="mini-cards"><div></div><div></div><div></div></div></div>
+    </div>
+    <div class="base"></div>
+  </div>
+  <aside class="notes" data-time="0:45">
+    <p>Meet Maya. She’s a composite, not one person, but you’ve met her. She’s at a community college and she has an idea: study groups for students who work nights, like she does.</p>
+    <p>(click) She has a laptop. (click) But the AI tools that could turn her idea into a product in an afternoon cost about twenty dollars a month, each. (click) And nobody she knows has ever started a company.</p>
+    <p>(click) At Stanford, both of those come almost by default. Maya gets neither. So we brought both to her campus. Watch her screen.</p>
+  </aside>
+</section>
+
+<!-- 3 NEED -->
+<section class="slide" data-label="The gap" data-steps="2" data-hook="waffle">
+  <p class="M r" style="--d:0;position:absolute;left:96px;top:150px;color:var(--green)">The need</p>
+  <div class="need-num">
+    <h2 class="X hands" data-only="0">1 in 2</h2>
+    <h2 class="X green" data-step="1">17%</h2>
+  </div>
+  <div class="need-cap">
+    <p class="S" data-only="0">say no one at their college taught them to judge AI.</p>
+    <p class="S" data-step="1">think their instructors can guide them on AI.</p>
+  </div>
+  <div class="waffle r" style="--d:200" id="waffle" aria-hidden="true"></div>
+  <div class="paywall" data-step="2"><span class="tag">ChatGPT</span><span class="tag">Cursor</span><span class="tag">Lovable</span><span class="S">all behind a paywall.</span></div>
+  <p class="src">Sources: CCSSE 2025 national cohort, AI item frequencies (community college students) · Digital Education Council, Global AI in Higher Ed Survey 2026 (US &amp; Canada)</p>
+  <aside class="notes" data-time="0:50">
+    <p>Is there actually a need? In the 2025 national community college survey, nearly half of students said no one at their college taught them how to judge what AI tells them. They’re figuring it out alone.</p>
+    <p>(click) And only about one in six students think their instructors are well equipped to guide them on AI.</p>
+    <p>(click) Then there’s cost. ChatGPT, Cursor, Lovable: the good versions are subscriptions. For students choosing between a textbook and a tank of gas, that’s a wall.</p>
+  </aside>
+</section>
+
+<!-- 4 BRIEF -->
+<section class="slide dark brief" data-label="The brief" data-steps="1" data-hook="brief">
+  <h2 style="position:absolute;left:96px;top:120px"><span class="X ln" style="--d:100;font-size:70px"><span>The brief:</span></span><span class="S ln" style="--d:200;font-size:110px;color:var(--leaf)"><span>two connections.</span></span></h2>
+  <svg viewBox="0 0 1600 900" aria-hidden="true">
+    <path class="lt" d="M140 560 C 420 560, 560 640, 720 690" fill="none" stroke-width="10" stroke-linecap="round"/>
+    <path d="M1460 560 C 1180 560, 1040 640, 880 690" fill="none" stroke="var(--hands)" stroke-width="10" stroke-linecap="round"/>
+    <path class="flow" d="M140 560 C 420 560, 560 640, 720 690" fill="none" stroke="#F3EDE1" stroke-width="4" stroke-linecap="round"/>
+    <path class="flow" d="M1460 560 C 1180 560, 1040 640, 880 690" fill="none" stroke="#F3EDE1" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="140" cy="560" r="18" fill="var(--forest)" stroke="var(--cream)" stroke-width="6"/>
+    <circle cx="1460" cy="560" r="18" fill="var(--forest)" stroke="var(--cream)" stroke-width="6"/>
+    <circle cx="800" cy="710" r="78" fill="#FFFDF7"/>
+  </svg>
+  <img class="r" src="assets/ngf-mark.jpg" alt="NGF" style="--d:300;position:absolute;left:744px;top:654px;width:112px;height:112px;border-radius:50%;mix-blend-mode:multiply">
+  <div class="blab r" style="--d:400;left:96px;top:420px"><p class="X leaf">Club leaders</p><p class="M" style="color:rgba(243,237,225,.55)">New campuses</p></div>
+  <div class="blab r" style="--d:500;right:96px;top:420px;text-align:right"><p class="X hands">AI companies</p><p class="M" style="color:rgba(243,237,225,.55)">OpenAI · Cursor · Lovable</p></div>
+  <p class="M" data-step="1" style="position:absolute;left:150px;top:620px;color:var(--leaf)">↑ Our side of the line</p>
+  <aside class="notes" data-time="0:30">
+    <p>Here’s where we started. NGF sits between two groups: club leaders at campuses NGF has never worked with, and AI companies like OpenAI, Cursor and Lovable who want their tools in students’ hands.</p>
+    <p>(click) Our brief was the green side. Find the campuses, find the club leaders, reach out, explain what NGF does. Once we got into it, we realized the brief could go further.</p>
+  </aside>
+</section>
+
+<!-- 5 MISSION -->
+<section class="slide dark" data-label="Mission">
+  <div class="ph duo mi-bg"><img src="assets/foothill-room.jpg" alt="" data-depth="-8"></div>
+  <div class="mi-h">
+    <h2 class="X"><span class="ln" style="--d:100"><span>Creators,</span></span><span class="ln" style="--d:200"><span class="hands">not just</span></span><span class="ln" style="--d:300"><span>consumers.</span></span></h2>
+    <p class="S r" style="--d:700">AI and entrepreneurship for every student, any background.</p>
+  </div>
+  <aside class="notes" data-time="0:40">
+    <p>This is NGF’s north star, in John’s words: students should be creators, not just consumers, of AI.</p>
+    <p>AI has made the barrier to building lower than it has ever been. The risk is that only some students get to use that. So the mission is to make entrepreneurship and AI accessible to every student, regardless of background or technical experience.</p>
+    <p>Our vision: every campus has an on-ramp. Any student can walk into a workshop and walk out having built something. That’s the systemic change: not one event, but a door that stays open.</p>
+  </aside>
+</section>
+
+<!-- 6 WIDEN -->
+<section class="slide" data-label="Our take" data-steps="4">
+  <h2 class="wd-h"><span class="X ln" style="--d:100"><span>We widened</span></span><span class="S ln" style="--d:200"><span>every door.</span></span></h2>
+  <div class="rows">
+    <div class="row" data-step="1" data-img="assets/menlo-room.jpg"><span class="from">Community colleges</span><span class="M">→</span><span class="to">Any campus</span><span class="pf">Menlo College</span></div>
+    <div class="row" data-step="2" data-img="assets/menlo-group.jpg"><span class="from">Startup clubs</span><span class="M">→</span><span class="to">Any club</span><span class="pf">Int’l Business Club</span></div>
+    <div class="row" data-step="3" data-img="assets/foothill-group.jpg"><span class="from">Introductions</span><span class="M">→</span><span class="to">Live builds</span><span class="pf">Lovable demo</span></div>
+    <div class="row" data-step="4" data-img="assets/foothill-room.jpg"><span class="from">One-off events</span><span class="M">→</span><span class="to">Every year</span><span class="pf">Foothill, year two</span></div>
+  </div>
+  <div class="peek" id="peek"><img alt=""></div>
+  <aside class="notes" data-time="1:10">
+    <p>This is the heart of what our team added. We kept the brief and widened it four ways. (Hover a row to flash its photo.)</p>
+    <p>(click) Not just community colleges: any campus where students lack access. That’s how our first workshop ended up at Menlo College, a small private college.</p>
+    <p>(click) Not just startup clubs: any club whose members want to build. Menlo’s host was the International Business Club. That multiplies the doors on every campus.</p>
+    <p>(click) Not just introductions: a hands-on build. Students watch an idea become a working website, live.</p>
+    <p>(click) And not one-off events: a channel that renews. Clubs plan programming every year, and Foothill invited NGF back for a second year in a row.</p>
+  </aside>
+</section>
+
+<!-- 7 WORK -->
+<section class="slide dark" data-label="What we did">
+  <h2 class="wk-h"><span class="X ln" style="--d:100"><span>Five stops.</span></span><span class="S ln" style="--d:200"><span>Four of us.</span></span></h2>
+  <div class="journey">
+    <svg viewBox="0 0 1408 120" aria-hidden="true"><path id="jpath" d="M80 56 H1328" fill="none" stroke="var(--hands)" stroke-width="4" stroke-dasharray="1250" stroke-dashoffset="1250"/></svg>
+    <div class="jstop r" style="--d:300;left:80px"><div class="ic"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="21" cy="21" r="13"/><path d="M31 31l12 12"/></svg></div><h3>Research</h3></div>
+    <div class="jstop r" style="--d:420;left:392px"><div class="ic"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="25" cy="17" r="8"/><path d="M10 44c2-9 8-14 15-14s13 5 15 14"/></svg></div><h3>Find leaders</h3></div>
+    <div class="jstop r" style="--d:540;left:704px"><div class="ic"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M6 24L44 7 36 44 24 30 6 24z"/><path d="M24 30L44 7"/></svg></div><h3>Reach out</h3></div>
+    <div class="jstop r" style="--d:660;left:1016px"><div class="ic"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><rect x="8" y="10" width="34" height="22" rx="3"/><path d="M3 40h44"/></svg></div><h3>Prep</h3></div>
+    <div class="jstop r" style="--d:780;left:1328px"><div class="ic" style="background:var(--hands);border-color:var(--hands);color:var(--forest)"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><rect x="18" y="5" width="14" height="24" rx="7"/><path d="M10 24a15 15 0 0 0 30 0M25 39v6"/></svg></div><h3>Deliver</h3></div>
+  </div>
+  <div class="tally r" style="--d:1000" id="tally">
+    <div data-key="collegesResearched"><b>0</b>campuses researched</div>
+    <div data-key="leadersContacted"><b>0</b>leaders contacted</div>
+    <div data-key="conversations"><b>0</b>conversations</div>
+  </div>
+  <aside class="notes" data-time="0:45">
+    <p>How we did it. Research: we mapped nearby campuses NGF had never worked with, starting with community colleges and then widening out. Then we found the actual student leaders, including clubs outside entrepreneurship.</p>
+    <p>We reached out and explained what NGF could bring their members. We built the workshop content together. And we delivered: Menlo one week, Foothill the next.</p>
+  </aside>
+</section>
+
+<!-- 8 BUILD -->
+<section class="slide" data-label="The build" data-hook="lovable">
+  <h2 class="bd-h"><span class="X ln" style="--d:100"><span>Idea in.</span></span><span class="S ln" style="--d:200"><span>Website out.</span></span></h2>
+  <div class="timer r" style="--d:500"><i></i><span id="lvTime">00:00</span></div>
+  <p class="replay r" style="--d:700">Live with Lovable · click to replay</p>
+  <div class="browser r" style="--d:250" id="browser" data-depth="6">
+    <div class="bar"><i></i><i></i><i></i><div class="url" id="lvUrl">lovable.dev</div></div>
+    <div class="site">
+      <div class="nav lv"><b>NightShift</b><div><span>Groups</span><span>Schedule</span><span>Join</span></div></div>
+      <div class="hero lv">Study groups for people who work late.</div>
+      <div class="btn lv">Find my group</div>
+      <div class="cards"><div class="lv">Accounting 1A<span>Tonight, 11pm</span></div><div class="lv">Calc II<span>Sunday, 9am</span></div><div class="lv">Intro to Python<span>Thursdays</span></div></div>
+    </div>
+    <div class="prompt" id="lvPrompt"><span id="lvText"></span><span class="caret"></span><span class="send"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#0F1A13" stroke-width="2.6" stroke-linecap="round"><path d="M9 15V3M4 8l5-5 5 5"/></svg></span></div>
+  </div>
+  <aside class="notes" data-time="0:40">
+    <p>This is the moment that lands in the room. We type an idea, in plain English, into Lovable. Here it’s Maya’s idea: study groups for students who work nights.</p>
+    <p>Within minutes there’s a working website. Not a mockup. Something you could share that night. AI has made the barrier to building lower than ever, and we want every student to see that with their own eyes. (Click the browser to replay.)</p>
+  </aside>
+</section>
+
+<!-- 9 MENLO -->
+<section class="slide" data-label="Menlo">
+  <div class="ph reveal" style="--d:0;left:0;top:0;width:600px;height:900px"><img src="assets/menlo-room.jpg" alt="A packed room at Menlo College" data-depth="-8"></div>
+  <p class="M r" style="--d:200;position:absolute;left:680px;top:130px;color:var(--hands)">Stop 01 · Tue 10.13</p>
+  <h2 class="cp-name" style="left:670px;top:180px"><span class="X ln" style="--d:200;font-size:168px"><span>Menlo</span></span><span class="S ln" style="--d:320"><span>College</span></span></h2>
+  <div class="cp-meta r" style="--d:600;left:680px;top:540px"><p class="M">International Business Club</p><p class="M">Host <b>Crystal Romero</b></p><p class="attend" data-attend="menloAttendance"></p></div>
+  <div class="pol" style="--rot:-4deg;--d:700;left:1100px;top:500px;width:390px;height:330px" data-depth="16"><img src="assets/menlo-group.jpg" alt="NGF team with Menlo students"></div>
+  <div class="stamp r" style="--d:900;left:500px;top:620px">
+    <svg viewBox="0 0 200 200"><defs><path id="c1" d="M100 100 m-74 0 a74 74 0 1 1 148 0 a74 74 0 1 1 -148 0"/></defs><circle cx="100" cy="100" r="98" fill="var(--hands)"/><text font-family="Martian Mono, monospace" font-size="12.5" letter-spacing="3" fill="#0E2A19"><textPath href="#c1">NEW CAMPUS ✺ FIRST WORKSHOP OF 2026 ✺ </textPath></text></svg>
+    <b>New</b>
+  </div>
+  <aside class="notes" data-time="0:40">
+    <p>Stop one: Menlo College, on a Tuesday. A brand-new relationship, and NGF’s first workshop of 2026. Our host was Crystal Romero and the International Business Club. Not a startup club, and that’s exactly the point.</p>
+    <p>We covered startup fundamentals, walked through how funding rounds work, and showed how Lovable turns an idea into a working website. Look at that room.</p>
+  </aside>
+</section>
+
+<!-- 10 FOOTHILL -->
+<section class="slide dark" data-label="Foothill">
+  <div class="ph reveal" style="--d:0;right:0;top:0;width:640px;height:900px"><img src="assets/foothill-room.jpg" alt="Workshop in progress at Foothill College" data-depth="-8"></div>
+  <p class="M r" style="--d:200;position:absolute;left:96px;top:130px;color:var(--hands)">Stop 02 · Wed 10.21</p>
+  <h2 class="cp-name" style="left:86px;top:180px"><span class="X ln" style="--d:200;font-size:116px"><span>Foothill</span></span><span class="S ln" style="--d:320"><span>College</span></span></h2>
+  <div class="cp-meta r" style="--d:600;left:96px;top:500px"><p class="M" style="color:rgba(243,237,225,.6)">Startup Club · Led by <b style="color:var(--cream)">Weng Han Fong</b></p><p class="attend" data-attend="foothillAttendance" style="color:var(--leaf)"></p></div>
+  <div class="chips r" style="--d:700;left:96px;top:580px;width:480px;color:var(--cream)"><span>Pivots</span><span>Competition</span><span>Debt vs equity</span><span>Bay Area trends</span></div>
+  <div class="pol" style="--rot:4deg;--d:700;left:600px;top:570px;width:440px;height:250px" data-depth="16"><img src="assets/foothill-group.jpg" alt="Foothill Startup Club with the NGF team"></div>
+  <div class="stamp r" style="--d:900;left:860px;top:90px">
+    <svg viewBox="0 0 200 200"><defs><path id="c2" d="M100 100 m-74 0 a74 74 0 1 1 148 0 a74 74 0 1 1 -148 0"/></defs><circle cx="100" cy="100" r="98" fill="var(--leaf)"/><text font-family="Martian Mono, monospace" font-size="12.5" letter-spacing="3" fill="#0E2A19"><textPath href="#c2">INVITED BACK ✺ SECOND YEAR IN A ROW ✺ </textPath></text></svg>
+    <b>Yr 2</b>
+  </div>
+  <aside class="notes" data-time="0:40">
+    <p>Stop two, the following Wednesday: Foothill College. Weng Han Fong, who leads the Startup Club, invited NGF back for the second year in a row. That’s the renewable channel working.</p>
+    <p>Same fundamentals and live build, and this crowd wanted to go deeper: the Bay Area startup scene, how founders handle competition, famous pivots, and how successful companies think about debt versus equity.</p>
+  </aside>
+</section>
+
+<!-- 11 STAKEHOLDERS -->
+<section class="slide dark" data-label="Stakeholders" data-steps="2">
+  <svg class="orbit" viewBox="0 0 1600 900" aria-hidden="true">
+    <g class="ring"><circle cx="800" cy="470" r="250" fill="none" stroke="rgba(243,237,225,.25)" stroke-width="1.5" stroke-dasharray="3 10"/></g>
+    <circle cx="800" cy="470" r="380" fill="none" stroke="rgba(243,237,225,.12)" stroke-width="1.5" stroke-dasharray="2 12"/>
+  </svg>
+  <div class="node core r" style="--d:150;left:800px;top:470px">Students</div>
+  <div class="node cust r" style="--d:350;left:450px;top:470px">Club<br>leaders<small>Need programming</small></div>
+  <div class="node cust r" style="--d:450;left:1150px;top:470px">AI<br>providers<small>Want reach</small></div>
+  <div data-step="1"><div class="node alt" style="left:500px;top:760px">YouTube</div><div class="node alt" style="left:800px;top:820px">Career centers</div><div class="node alt" style="left:1100px;top:760px">AI company courses</div></div>
+  <div class="timebox" data-step="1"><p class="S">The real competitor?</p><p class="X">Time.</p></div>
+  <div class="edgebox" data-step="2"><p class="M" style="color:var(--hands);margin-bottom:14px">Our edge</p><p class="X">Peer-led.<br>In person.<br>Hands-on.</p></div>
+  <aside class="notes" data-time="0:45">
+    <p>Who do we serve? At the center are students, many first-generation or working while in school.</p>
+    <p>Our direct customers are two groups: club leaders, who need programming that actually fills a room, and AI providers, who want to reach students they’d otherwise miss.</p>
+    <p>(click) Students do have alternatives: YouTube tutorials, campus career centers, AI companies’ own courses. But the biggest competitor is time. These students are busy.</p>
+    <p>(click) Our edge: we’re peers close to their age, we show up in person on their campus, and they leave having built something, not just having watched.</p>
+  </aside>
+</section>
+
+<!-- 12 VALUE -->
+<section class="slide" data-label="Our impact">
+  <h2 class="vl-h"><span class="X ln" style="--d:100"><span>We didn’t just connect.</span></span><span class="S ln" style="--d:200"><span>We built.</span></span></h2>
+  <div class="tiles">
+    <div class="tile r" style="--d:300"><span class="big">1</span><span class="n">01</span><h3 class="X">Pipeline</h3><p>Campuses + leaders NGF never had</p></div>
+    <div class="tile r" style="--d:400"><span class="big">2</span><span class="n">02</span><h3 class="X">Doors</h3><p>Past CCs, past startup clubs</p></div>
+    <div class="tile r" style="--d:500"><span class="big">3</span><span class="n">03</span><h3 class="X">Workshop</h3><p>Fundamentals + a live build</p></div>
+    <div class="tile r" style="--d:600"><span class="big">4</span><span class="n">04</span><h3 class="X">Capacity</h3><p>Four people at every stop</p></div>
+  </div>
+  <aside class="notes" data-time="0:40">
+    <p>So what exists now that wouldn’t without our team? A pipeline: a researched list of campuses and club leaders NGF had never contacted. More doors: looking past community colleges and startup clubs is literally what got us into Menlo. The workshop itself, which we prepped together. And capacity: four more people to prep and staff each stop.</p>
+    <p>The brief gave us two connections to build. We added the campuses, the clubs, and the content that make those connections worth something.</p>
+  </aside>
+</section>
+
+<!-- 13 NEXT -->
+<section class="slide" data-label="Next stops">
+  <h2 class="nx-h"><span class="X ln" style="--d:100"><span>The line keeps</span></span><span class="S ln" style="--d:200"><span>going.</span></span></h2>
+  <div class="nextline">
+    <svg viewBox="0 0 1408 80" aria-hidden="true"><path d="M40 37 H260" stroke="var(--green)" stroke-width="8" stroke-linecap="round"/><path d="M260 37 H1370" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 16" opacity=".5"/></svg>
+    <div class="ns done" style="--d:0;left:50px"><i></i><b>Menlo</b></div>
+    <div class="ns done" style="--d:100;left:240px"><i></i><b>Foothill</b></div>
+    <div class="ns" style="--d:200;left:430px"><i></i><b>De Anza</b></div>
+    <div class="ns" style="--d:300;left:620px"><i></i><b>Cañada</b></div>
+    <div class="ns" style="--d:400;left:810px"><i></i><b>San Mateo</b></div>
+    <div class="ns" style="--d:500;left:1000px"><i></i><b>Skyline</b></div>
+    <div class="ns" style="--d:600;left:1180px"><i></i><b>Mission</b></div>
+    <div class="ns" style="--d:700;left:1350px"><i></i><b>West Valley</b></div>
+  </div>
+  <div class="ask r" style="--d:1200">
+    <div><p class="X">Know a club advisor?</p><p class="S">Introduce us.</p></div>
+    <p class="M">Goal: more stops this quarter<br>+ track who keeps building</p>
+  </div>
+  <aside class="notes" data-time="0:40">
+    <p>Where next? These are community colleges within a short drive that we’re going after. (Swap in the exact schools on your outreach list.)</p>
+    <p>Our goal for the rest of the quarter: turn our conversations into more stops on this line, and start measuring whether students keep building after we leave.</p>
+    <p>And our ask: if you know a club advisor at any of these campuses, or someone on an AI company’s education team, we would love an introduction.</p>
+  </aside>
+</section>
+
+<!-- 14 THANKS -->
+<section class="slide dark" data-label="Thanks">
+  <div class="film f1"><div class="ph" style="width:420px"><img src="assets/menlo-group.jpg" alt=""></div><div class="ph" style="width:540px"><img src="assets/foothill-room.jpg" alt=""></div><div class="ph" style="width:200px"><img src="assets/menlo-room.jpg" alt=""></div><div class="ph" style="width:560px"><img src="assets/foothill-group.jpg" alt=""></div><div class="ph" style="width:420px"><img src="assets/menlo-group.jpg" alt=""></div><div class="ph" style="width:540px"><img src="assets/foothill-room.jpg" alt=""></div><div class="ph" style="width:200px"><img src="assets/menlo-room.jpg" alt=""></div><div class="ph" style="width:560px"><img src="assets/foothill-group.jpg" alt=""></div></div>
+  <div class="film f2"><div class="ph" style="width:560px"><img src="assets/foothill-group.jpg" alt=""></div><div class="ph" style="width:200px"><img src="assets/menlo-room.jpg" alt=""></div><div class="ph" style="width:420px"><img src="assets/menlo-group.jpg" alt=""></div><div class="ph" style="width:540px"><img src="assets/foothill-room.jpg" alt=""></div><div class="ph" style="width:560px"><img src="assets/foothill-group.jpg" alt=""></div><div class="ph" style="width:200px"><img src="assets/menlo-room.jpg" alt=""></div><div class="ph" style="width:420px"><img src="assets/menlo-group.jpg" alt=""></div><div class="ph" style="width:540px"><img src="assets/foothill-room.jpg" alt=""></div></div>
+  <div class="ty r" style="--d:300"><p class="X">Thank you</p><p class="S">questions?</p></div>
+  <aside class="notes" data-time="0:10"><p>Thank you. We’d love your questions.</p></aside>
+</section>
+
+<div class="chrome">
+  <div class="brand"><img src="assets/ngf-mark.jpg" alt="">Next Generation Founders</div>
+  <div class="ct" id="ct">01 / 14</div>
+</div>
+<nav class="route" id="route" aria-label="Slides">
+  <div class="track"></div><div class="fillr" id="fillr"></div>
+  <svg class="tram" id="tram" viewBox="0 0 38 22" aria-hidden="true"><rect x="1" y="2" width="36" height="16" rx="6" fill="#E3954B"/><rect x="6" y="6" width="7" height="5" rx="1.5" fill="#FFFDF7"/><rect x="16" y="6" width="7" height="5" rx="1.5" fill="#FFFDF7"/><rect x="26" y="6" width="7" height="5" rx="1.5" fill="#FFFDF7"/><circle cx="10" cy="19" r="2.4" fill="#0F1A13"/><circle cx="28" cy="19" r="2.4" fill="#0F1A13"/></svg>
+</nav>
+<div class="cur" id="cur"></div>
+</div>
+</div>
+
+<div class="notes-panel" id="notesPanel" aria-live="polite"></div>
+<div class="controls">
+  <button id="prev" aria-label="Previous">←</button>
+  <button id="notesBtn">Notes (N)</button>
+  <button id="presBtn">Presenter (P)</button>
+  <button id="next" aria-label="Next">→</button>
+</div>
+
+<div id="presenter">
+  <div><div class="now" id="pNow"></div><h1 id="pTitle"></h1><div class="pn" id="pNotes"></div></div>
+  <div class="side">
+    <div class="clock" id="pClock">00:00</div><div class="sm">elapsed (click to reset)</div>
+    <div class="nx"><span class="sm">Up next</span><br><b id="pNext"></b></div>
+    <div class="btns"><button id="pPrev">← Back</button><button id="pFwd">Next →</button></div>
+    <p class="sm" style="margin-top:24px">Arrow keys work here too. This window drives the main deck.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const cfg=window.DECK_CONFIG||{};
+  const slides=[...document.querySelectorAll('.slide')];
+  const stage=document.getElementById('stage');
+  const route=document.getElementById('route');
+  const panel=document.getElementById('notesPanel');
+  const cursor=document.getElementById('cur');
+  const n=slides.length;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isPresenter=new URLSearchParams(location.search).has('presenter');
+  const bc=('BroadcastChannel' in window)?new BroadcastChannel('ngf-deck'):null;
+  let cur=0,step=0,scale=1;
+
+  /* config-driven numbers */
+  document.querySelectorAll('#tally [data-key]').forEach(el=>{const v=cfg[el.dataset.key];if(v==null)el.remove();else el.querySelector('b').dataset.count=v});
+  if(!document.querySelector('#tally [data-key]'))document.getElementById('tally').remove();
+  document.querySelectorAll('[data-attend]').forEach(el=>{const v=cfg[el.dataset.attend];if(v==null)el.remove();else el.textContent=v+' students in the room'});
+
+  /* route */
+  const pct=k=>n>1?(k/(n-1))*100:0;
+  const stops=slides.map((s,k)=>{const b=document.createElement('button');b.className='stop';b.style.left=pct(k)+'%';b.setAttribute('aria-label','Slide '+(k+1)+': '+s.dataset.label);b.addEventListener('click',e=>{e.stopPropagation();go(k,0)});route.appendChild(b);return b});
+  const tram=document.getElementById('tram'),fillr=document.getElementById('fillr'),ct=document.getElementById('ct');
+
+  /* timers */
+  const timers=[];
+  const later=(fn,ms)=>timers.push(setTimeout(fn,reduce?0:ms));
+  const clearTimers=()=>{while(timers.length)clearTimeout(timers.pop())};
+
+  /* waffle */
+  const waffle=document.getElementById('waffle');
+  for(let i=0;i<100;i++)waffle.appendChild(document.createElement('i'));
+  const dots=[...waffle.children];
+
+  /* hover peek on the widen rows */
+  const peek=document.getElementById('peek'),peekImg=peek.querySelector('img');
+  document.querySelectorAll('.row[data-img]').forEach(r=>{
+    r.addEventListener('mouseenter',()=>{if(!r.classList.contains('on'))return;peekImg.src=r.dataset.img;peek.classList.add('show');cursor.classList.add('dot')});
+    r.addEventListener('mouseleave',()=>{peek.classList.remove('show');cursor.classList.remove('dot')});
+  });
+
+  /* lovable */
+  function runLovable(){
+    clearTimers();
+    const text='Build a site for night-shift study groups at my college';
+    const t=document.getElementById('lvText'),time=document.getElementById('lvTime'),url=document.getElementById('lvUrl'),pr=document.getElementById('lvPrompt');
+    const parts=[...document.querySelectorAll('.lv')];
+    t.textContent='';time.textContent='00:00';url.textContent='lovable.dev';pr.style.opacity=1;pr.style.transform='';
+    parts.forEach(p=>p.classList.remove('in'));
+    if(reduce){t.textContent=text;parts.forEach(p=>p.classList.add('in'));time.textContent='04:12';url.textContent='nightshift.lovable.app';return}
+    let i=0,sec=0;
+    const type=()=>{if(i<=text.length){t.textContent=text.slice(0,i++);later(type,30+Math.random()*30)}else later(build,450)};
+    const tick=()=>{sec=Math.min(252,sec+7);time.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');if(sec<252)later(tick,55)};
+    function build(){tick();pr.style.transform='translateY(16px)';pr.style.opacity=0;parts.forEach((p,j)=>later(()=>p.classList.add('in'),300+j*380));later(()=>{url.textContent='nightshift.lovable.app'},300+parts.length*380)}
+    later(type,1300);
+  }
+  document.getElementById('browser').addEventListener('click',e=>{e.stopPropagation();runLovable()});
+
+  const hooks={
+    story:{step(s,k){document.getElementById('laptop').dataset.s=k>=4?'site':k>=2?'wall':'idea'}},
+    waffle:{step(s,k){clearTimers();dots.forEach((d,i)=>{d.className='';if(k===0)later(()=>{if(i<47)d.className='a'},500+i*11);else later(()=>{if(i<17)d.className='b'},100+i*22)})}},
+    brief:{step(s,k){s.classList.toggle('s1',k>=1)}},
+    lovable:{enter:runLovable}
+  };
+
+  function countUp(s){s.querySelectorAll('[data-count]').forEach(el=>{const to=+el.dataset.count;if(reduce){el.textContent=to;return}const t0=performance.now()+600;(function f(t){const p=Math.max(0,Math.min(1,(t-t0)/1400));el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(performance.now())})}
+  function drawJourney(s){const p=s.querySelector('#jpath');if(!p)return;p.style.transition='none';p.style.strokeDashoffset=1250;p.getBoundingClientRect();p.style.transition='stroke-dashoffset 1.8s cubic-bezier(.2,.8,.2,1) .5s';p.style.strokeDashoffset=0}
+
+  /* engine */
+  const maxStep=s=>+(s.dataset.steps||0);
+  function applyStep(){
+    const s=slides[cur];
+    s.querySelectorAll('[data-step]').forEach(e=>e.classList.toggle('on',step>=+e.dataset.step));
+    s.querySelectorAll('[data-only]').forEach(e=>e.classList.toggle('on',step===+e.dataset.only));
+    const h=hooks[s.dataset.hook];if(h&&h.step)h.step(s,step);
+    renderNotes();sync();
+  }
+  function go(k,st){
+    if(k<0||k>=n)return;
+    const old=slides[cur];
+    if(k!==cur){
+      clearTimers();
+      stage.classList.toggle('back',k<cur);
+      slides.forEach(x=>x.classList.remove('leaving'));
+      old.classList.remove('active');old.classList.add('leaving');
+      setTimeout(()=>old.classList.remove('leaving'),1000);
+    }
+    cur=k;const s=slides[cur];
+    step=st==='end'?maxStep(s):st;
+    s.classList.remove('leaving');s.classList.add('active');
+    stage.classList.toggle('on-dark',s.classList.contains('dark'));
+    stops.forEach((b,j)=>b.classList.toggle('passed',j<=cur));
+    tram.style.left=pct(cur)+'%';fillr.style.width=pct(cur)+'%';
+    ct.textContent=String(cur+1).padStart(2,'0')+' / '+n;
+    peek.classList.remove('show');cursor.classList.remove('dot');
+    const h=hooks[s.dataset.hook];if(h&&h.enter)h.enter(s);
+    countUp(s);drawJourney(s);applyStep();
+    try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+  }
+  function next(){if(step<maxStep(slides[cur])){step++;applyStep()}else go(cur+1,0)}
+  function prev(){if(step>0){step--;applyStep()}else go(cur-1,'end')}
+
+  /* notes + presenter */
+  const notesHTML=k=>{const a=slides[k]&&slides[k].querySelector('aside.notes');return a?a.innerHTML:''};
+  function renderNotes(){const a=slides[cur].querySelector('aside.notes');panel.innerHTML='<div class="t">'+(cur+1)+' / '+n+' · '+slides[cur].dataset.label+(a?' · '+a.dataset.time:'')+' · step '+step+'/'+maxStep(slides[cur])+'</div>'+notesHTML(cur)}
+  function sync(){if(bc&&!isPresenter)bc.postMessage({cur,step})}
+  function fit(){const off=panel.classList.contains('open')?panel.offsetHeight:0;scale=Math.min(innerWidth/1600,Math.max(innerHeight-off,200)/900);stage.style.transform='scale('+scale+')';document.querySelector('.viewport').style.bottom=off+'px'}
+  function toggleNotes(){panel.classList.toggle('open');fit()}
+  function openPresenter(){window.open(location.pathname+'?presenter','ngfPresenter','width=1100,height=720')}
+
+  if(isPresenter){
+    document.body.classList.add('presenter');
+    let t0=Date.now();const clock=document.getElementById('pClock');clock.onclick=()=>{t0=Date.now()};
+    setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);clock.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
+    const show=(c,st)=>{const a=slides[c].querySelector('aside.notes');document.getElementById('pNow').textContent='Slide '+(c+1)+' of '+n+' · step '+st+'/'+maxStep(slides[c])+(a?' · aim for '+a.dataset.time:'');document.getElementById('pTitle').textContent=slides[c].dataset.label;document.getElementById('pNotes').innerHTML=notesHTML(c);document.getElementById('pNext').textContent=st<maxStep(slides[c])?'(another click on this slide)':(slides[c+1]?slides[c+1].dataset.label:'End')};
+    show(0,0);
+    const send=cmd=>bc&&bc.postMessage({cmd});
+    if(bc){bc.onmessage=e=>{if('cur' in e.data)show(e.data.cur,e.data.step)};send('hello')}
+    document.getElementById('pPrev').onclick=()=>send('prev');document.getElementById('pFwd').onclick=()=>send('next');
+    addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();send('next')}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();send('prev')}});
+    return;
+  }
+  if(bc)bc.onmessage=e=>{const c=e.data.cmd;if(c==='next')next();else if(c==='prev')prev();else if(c==='hello')sync()};
+
+  /* cursor + parallax */
+  let tx=800,ty=450,cx=800,cy=450,idle;
+  stage.addEventListener('mousemove',e=>{
+    const r=stage.getBoundingClientRect();tx=(e.clientX-r.left)/scale;ty=(e.clientY-r.top)/scale;
+    stage.style.setProperty('--mx',((tx/1600)-.5).toFixed(3));stage.style.setProperty('--my',((ty/900)-.5).toFixed(3));
+    peek.style.left=tx+'px';peek.style.top=ty+'px';
+    stage.classList.remove('idle');clearTimeout(idle);idle=setTimeout(()=>stage.classList.add('idle'),2200);
+    const hot=e.target.closest('.browser,.waffle,.tile,.jstop,.ns,.chips span,.route .stop');
+    cursor.classList.toggle('big',!!hot&&!cursor.classList.contains('dot'));
+  });
+  (function loop(){cx+=(tx-cx)*.22;cy+=(ty-cy)*.22;cursor.style.transform='translate('+cx+'px,'+cy+'px)';requestAnimationFrame(loop)})();
+
+  /* input */
+  document.getElementById('prev').onclick=prev;document.getElementById('next').onclick=next;
+  document.getElementById('notesBtn').onclick=toggleNotes;document.getElementById('presBtn').onclick=openPresenter;
+  addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+    else if(e.key==='Home')go(0,0);else if(e.key==='End')go(n-1,0);
+    else if(e.key==='n'||e.key==='N')toggleNotes();
+    else if(e.key==='p'||e.key==='P')openPresenter();
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+  });
+  stage.addEventListener('click',e=>{if(e.target.closest('button,a'))return;next()});
+  let sx=null;
+  addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+  addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)(dx<0?next:prev)();sx=null});
+  addEventListener('resize',fit);
+  const m=location.hash.match(/^#(\d+)$/);
+  fit();go(m?Math.min(n,parseInt(m[1],10))-1:0,0);
+})();
+</script>
+</body>
+</html>
